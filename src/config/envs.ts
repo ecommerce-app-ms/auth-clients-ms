@@ -3,15 +3,16 @@ import * as joi from 'joi';
 
 interface EnvVars {
   PORT: number;
-  // DATABASE_URL: string;
-
+  DATABASE_URL: string;
+  JWT_SECRET: string;
   NAST_SERVERS: string[];
 }
 
 const envSchema = joi
   .object({
     PORT: joi.number().required(),
-    // DATABASE_URL: joi.string().required(),
+    DATABASE_URL: joi.string().required(),
+    JWT_SECRET: joi.string().required(),
     NAST_SERVERS: joi.array().items(joi.string().required()),
   })
   .unknown(true);
@@ -28,6 +29,7 @@ const envVars: EnvVars = value;
 
 export const envs = {
   port: envVars.PORT,
-  // dataBaseUrl: envVars.DATABASE_URL,
+  dataBaseUrl: envVars.DATABASE_URL,
   nastServers: envVars.NAST_SERVERS,
+  jwtSecret: envVars.JWT_SECRET,
 };
