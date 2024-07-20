@@ -1,0 +1,47 @@
+# dependencias
+FROM node:21-alpine3.19 as deps
+WORKDIR /usr/src/app
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm install
+
+
+
+# builder construccion de la aplicacion 
+FROM node:21-alpine3.19 as build
+WORKDIR /usr/src/app
+#copiar de deps los modulos de node
+COPY  --from=deps /usr/src/app/node_modules ./node_modules
+
+# copiar el codigo fuente de la aplicacion
+COPY . .
+#hacer test
+# RUM  npm run test
+
+# construmimos la aplicacion
+RUN npm rum build   
+
+#dejamos solo las dependencias de produccion
+RUN npm ci -f --only=production && npm cache clean --force
+
+#ejecutar prisma
+RUN npx prisma generate
+
+#crear la imagen final de docker
+FROM node:21-alpine3.19 as prod
+WORKDIR /usr/src/app
+# copiamos los modulos de node
+COPY --from=build /usr/src/app/node_modules ./node_modules
+
+# copiar la carpeta dist / codigo final
+COPY --from=build /usr/src/app/dist ./dist
+
+#seguridad crear un usuario y movernos a el 
+
+ENV NODE_ENV=production
+
+USER node
+
+EXPOSE 3000
+
+CMD [ "node", "dist/main.js"]
