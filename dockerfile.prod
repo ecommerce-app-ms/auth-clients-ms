@@ -19,7 +19,7 @@ COPY . .
 # RUM  npm run test
 
 # construmimos la aplicacion
-RUN npm rum build   
+RUN npm run build   
 
 #dejamos solo las dependencias de produccion
 RUN npm ci -f --only=production && npm cache clean --force
